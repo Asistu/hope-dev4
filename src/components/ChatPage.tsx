@@ -13,9 +13,13 @@ const ChatPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
   const chatboxRef = useRef<HTMLDivElement>(null);
+  const initialLaunchRef = useRef(false); // New ref to track initial launch
 
   useEffect(() => {
-    launchBot();
+    if (!initialLaunchRef.current) {
+      launchBot();
+      initialLaunchRef.current = true; // Mark the initial launch as processed
+    }
   }, []);
 
   useEffect(() => {
@@ -45,15 +49,14 @@ const ChatPage: React.FC = () => {
     const data = await response.json();
     console.log(data);
 
-    data.forEach((message: any) => {
-      if (message.payload.message || message.payload.buttons) {
-        setMessages(prev => [...prev, {
-          text: message.payload.message || "Please choose an option:",
-          sender: 'bot',
-          buttons: message.payload.buttons
-        }]);
-      }
-    });
+    // Add messages only if they haven't been added before
+    const initialMessages = data.map((message: any) => ({
+      text: message.payload.message || "Please choose an option:",
+      sender: 'bot',
+      buttons: message.payload.buttons
+    }));
+
+    setMessages(prev => [...prev, ...initialMessages]);
   };
 
   const sendMessage = async (text?: string, buttonRequest?: any) => {
@@ -81,15 +84,13 @@ const ChatPage: React.FC = () => {
     const data = await response.json();
     console.log(data);
 
-    data.forEach((message: any) => {
-      if (message.payload.message || message.payload.buttons) {
-        setMessages(prev => [...prev, {
-          text: message.payload.message || "Please choose an option:",
-          sender: 'bot',
-          buttons: message.payload.buttons
-        }]);
-      }
-    });
+    const newMessages = data.map((message: any) => ({
+      text: message.payload.message || "Please choose an option:",
+      sender: 'bot',
+      buttons: message.payload.buttons
+    }));
+
+    setMessages(prev => [...prev, ...newMessages]);
   };
 
   return (

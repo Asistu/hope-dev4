@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase'; // Adjust the import path based on your project structure
 import BackButton from './BackButton';
 
 const SignUpPage: React.FC = () => {
@@ -11,29 +13,37 @@ const SignUpPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreeTerms) {
       alert('Please agree to the terms and conditions');
       return;
     }
-    // Here you would typically handle the sign-up logic with a backend API
-    console.log('Sign up:', { name, email, password });
-    
-    // Store the name for future logins
-    localStorage.setItem('lastSignupName', name);
-    
-    // Simulate a successful sign-up
-    const fakeToken = 'fake-token-' + Date.now();
-    const fakeUser = {
-      id: 'user-' + Date.now(),
-      name,
-      email,
-      subscription: 'free' as const
-    };
-    login(fakeToken, fakeUser);
-    
-    navigate('/price-plan');
+
+    try {
+      // Create user with Firebase authentication
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Store the name locally (you might also store it in Firestore if needed)
+      localStorage.setItem('lastSignupName', name);
+
+      // Simulate login using the Firebase user ID and token
+      const fakeToken = user.uid; // Firebase provides a UID for each user
+      const fakeUser = {
+        id: user.uid,
+        name,
+        email: user.email || '',
+        subscription: 'free' as const,
+      };
+      login(fakeToken, fakeUser);
+
+      // Redirect to the pricing plan page
+      navigate('/price-plan');
+    } catch (error) {
+      console.error('Error signing up:', error);
+      alert('Failed to create an account. Please try again.');
+    }
   };
 
   return (

@@ -1,65 +1,44 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import BackButton from './BackButton';
+import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase'; // Adjust the path to where your firebase.ts is
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const navigate = useNavigate();
-  const { login } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     try {
-      // Simulate an API call to fetch user data
-      // In a real application, you would make an actual API call here
-      const response = await simulateLoginAPI(email, password);
-      
-      if (response.success) {
-        login(response.token, response.user);
-        navigate('/dashboard');
-      } else {
-        setError('Login failed. Please check your credentials.');
-      }
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+      await signInWithEmailAndPassword(auth, email, password);
+      alert('Login successful');
+      navigate('/dashboard'); // Change this to your desired path
+    } catch (error: any) {
+      console.error('Error logging in:', error.message);
+      alert('Failed to log in. Please check your email and password.');
     }
   };
 
-  // Simulate an API call to a backend service
-  const simulateLoginAPI = async (email: string, password: string) => {
-    // This is a mock function. In a real app, you'd call your backend API here.
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        // Simulate successful login
-        if (email && password) {
-          resolve({
-            success: true,
-            token: 'fake-token-' + Date.now(),
-            user: {
-              id: 'user-' + Date.now(),
-              name: localStorage.getItem('lastSignupName') || 'User', // Use the name from last signup or default to 'User'
-              email: email,
-              subscription: 'free' as const
-            }
-          });
-        } else {
-          resolve({ success: false });
-        }
-      }, 1000); // Simulate network delay
-    });
+  const handlePasswordReset = async () => {
+    if (!email) {
+      alert('Please enter your email to reset your password.');
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert('Password reset email sent! Please check your inbox.');
+    } catch (error: any) {
+      console.error('Error sending password reset email:', error.message);
+      alert('Failed to send password reset email. Please make sure the email is correct.');
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-purple-100 relative">
-      <BackButton />
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 className="text-2xl font-semibold mb-6 text-center text-purple-900">Login to Hope AI</h2>
-        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-        <form onSubmit={handleSubmit}>
+        <h2 className="text-2xl font-semibold mb-6 text-center">Login</h2>
+        <form onSubmit={handleLogin}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -88,19 +67,22 @@ const LoginPage: React.FC = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition duration-300"
+            className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition duration-300"
           >
-            Log In
+            Login
           </button>
         </form>
         <div className="mt-4 text-center">
-          <Link to="/signup" className="text-purple-600 hover:text-purple-800 transition duration-300">
-            Don't have an account? Sign up
-          </Link>
+          <button
+            className="text-purple-600 hover:text-purple-800 transition duration-300"
+            onClick={handlePasswordReset}
+          >
+            Forgot your password?
+          </button>
         </div>
-        <div className="mt-2 text-center">
-          <Link to="/forgot-password" className="text-sm text-gray-600 hover:text-gray-800 transition duration-300">
-            Forgot password?
+        <div className="mt-4 text-center">
+          <Link to="/signup" className="text-purple-600 hover:text-purple-800 transition duration-300">
+            Don’t have an account? Sign up
           </Link>
         </div>
       </div>
