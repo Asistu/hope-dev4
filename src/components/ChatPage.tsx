@@ -29,8 +29,8 @@ const ChatPage: React.FC = () => {
   }, [messages]);
 
   const launchBot = async () => {
-    const apiKey = 'VF.DM.6705143e634c6b114850b9e0';
-    const versionID = '66fe734ad6989d0b2de89cff';
+    const apiKey = 'VF.DM.670f9643760661013e24b31d.IXRgFhXAmU2KpIQQ';
+    const versionID = '6709127ca410ad0f945e6a2a';
     const userID = 'unique-user-id';
 
     const response = await fetch(`https://general-runtime.voiceflow.com/state/${versionID}/user/${userID}/interact`, {
