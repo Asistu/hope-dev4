@@ -30,7 +30,7 @@ const ChatPage: React.FC = () => {
 
   const launchBot = async () => {
     const apiKey = 'VF.DM.670f9643760661013e24b31d.IXRgFhXAmU2KpIQQ';
-    const versionID = '6709127ca410ad0f945e6a2a';
+    const versionID = '6709127ca410ad0f945e6a2a'; // Correct Voiceflow version ID
     const userID = 'unique-user-id';
 
     const response = await fetch(`https://general-runtime.voiceflow.com/state/${versionID}/user/${userID}/interact`, {
@@ -49,9 +49,8 @@ const ChatPage: React.FC = () => {
     const data = await response.json();
     console.log(data);
 
-    // Add messages only if they haven't been added before
     const initialMessages = data.map((message: any) => ({
-      text: message.payload.message || "Please choose an option:",
+      text: message.payload.message || (message.payload.buttons ? "Please choose an option:" : ""),
       sender: 'bot',
       buttons: message.payload.buttons
     }));
@@ -63,8 +62,8 @@ const ChatPage: React.FC = () => {
     const messageToSend = text || inputMessage.trim();
     if (!messageToSend && !buttonRequest) return;
 
-    const apiKey = 'VF.DM.6705143e634c6b114850b9e0';
-    const versionID = '66fe734ad6989d0b2de89cff';
+    const apiKey = 'VF.DM.670f9643760661013e24b31d.IXRgFhXAmU2KpIQQ'; // Use the same API key
+    const versionID = '6709127ca410ad0f945e6a2a'; // Consistent Voiceflow version ID
     const userID = 'unique-user-id';
 
     setMessages(prev => [...prev, { text: messageToSend, sender: 'user' }]);
@@ -85,7 +84,7 @@ const ChatPage: React.FC = () => {
     console.log(data);
 
     const newMessages = data.map((message: any) => ({
-      text: message.payload.message || "Please choose an option:",
+      text: message.payload.message || (message.payload.buttons ? "Please choose an option:" : ""),
       sender: 'bot',
       buttons: message.payload.buttons
     }));
